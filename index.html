@@ -3,13 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clase JS</title>
+    <title>Concesionaria ODIN</title>
+    <link rel="stylesheet" href="main.css">
 </head>
 <body>
-    
-    
-    
-    
+    <div class="container">
+    <div class="formulario">
+        <h1>Concesionaria ODIN</h1>
+        <form id="formularioCompra">
+            <label for="vehiculo">Seleccione un vehículo:</label>
+            <select id="vehiculo">
+                <option value="">--Seleccionar--</option>
+                <option value="sandero">Sandero</option>
+                <option value="koleos">Koleos</option>
+                <option value="kardian">Kardian</option>
+                <option value="megane">Megane</option>
+            </select>
+
+            <label for="modelo">Seleccione un modelo:</label>
+            <select id="modelo" disabled>
+                <option value="">--Seleccionar--</option>
+            </select>
+
+            <div id="planCuotas" style="display: none;">
+                <label for="cuotas">Seleccione un plan de cuotas:</label>
+                <select id="cuotas">
+                    <option value="3">3 cuotas</option>
+                    <option value="6">6 cuotas</option>
+                    <option value="12">12 cuotas</option>
+                </select>
+                <div id="valorCuota" style="display: none;">El valor de la cuota es: <span id="valorCuotaSpan"></span></div>
+            </div>
+
+            <button type="button" id="confirmarCompra" style="display: none;">Confirmar Compra</button>
+
+            <div id="sorteo" style="display: none;">
+                <p>Ingrese 5 números para participar en el sorteo (entre 0 y 100):</p>
+                <div id="sorteoNumeros">
+                    <input type="number" class="numeroSorteo" min="0" max="100">
+                    <input type="number" class="numeroSorteo" min="0" max="100">
+                    <input type="number" class="numeroSorteo" min="0" max="100">
+                    <input type="number" class="numeroSorteo" min="0" max="100">
+                    <input type="number" class="numeroSorteo" min="0" max="100">
+                </div>
+                <button type="button" id="participarSorteo">Participar en Sorteo</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="imagenes" id="imagenes">
+        <!-- Aquí aparecerán las imágenes dinámicamente -->
+    </div>
     <script src="./index.js"></script>
+</div>
 </body>
 </html>
