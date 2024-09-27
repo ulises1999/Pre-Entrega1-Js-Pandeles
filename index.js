@@ -1,28 +1,23 @@
-const vehiculos = {
-    sandero: {
-        modelos: ["life 1.6", "itens 1.6", "itens 1.6 CVT"],
-        precios: [23100000, 25050000, 25700000],
-        imagenes: ["./images/Sandero-life1.6.png", "./images/Sandero-itens1.6.png", "Sandero-itens1.6-CVT.png"]
-    },
-    koleos: {
-        modelos: ["Koleos"],
-        precios: [52450000],
-        imagenes: ["./images/Koleos.PNG"]
-    },
-    kardian: {
-        modelos: ["Evolution 150 MT", "Evolution 200 EDC", "Techno 200 EDC", "Premiere Edition 200 EDC"],
-        precios: [25800000, 28000000, 29200000, 29950000],
-        imagenes: ["./images/Kardian-Evolution-150-MT.PNG", "./images/Kardian-Evolution-200-EDC.png", "./images/Kardian-Techno-200-EDC.png", "./images/Premiere-Edition-200-EDC.png"]
-    },
-    megane: {
-        modelos: ["Megane"],
-        precios: [71000000],
-        imagenes: ["./images/Koleos.PNG"]
-    }
-};
-
+let vehiculos = {};
 let precioSeleccionado = 0;
 let cuotasSeleccionadas = 0;
+let sorteoRealizado = false; // Nueva variable para controlar si se realizó el sorteo
+
+// Cargar los datos de vehículos desde vehiculos.json
+fetch('./data/vehiculos.json')
+    .then(response => response.json())
+    .then(data => {
+        vehiculos = data;
+    })
+    .catch(error => {
+        console.error('Error al cargar los datos:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un problema al cargar los datos. Intente nuevamente más tarde.',
+        });
+    });
+
 
 function guardarEnLocalStorage(clave, valor) {
     localStorage.setItem(clave, JSON.stringify(valor));
@@ -39,9 +34,11 @@ document.getElementById('vehiculo').addEventListener('change', function() {
     const modeloSelect = document.getElementById('modelo');
     const imagenesContainer = document.getElementById('imagenes');
 
+    // Limpiar las opciones de modelos e imágenes
     modeloSelect.innerHTML = '<option value="">--Seleccionar--</option>';
     imagenesContainer.innerHTML = '';
 
+    // Verificar si el vehículo seleccionado tiene modelos disponibles
     if (vehiculos[vehiculoSeleccionado]) {
         vehiculos[vehiculoSeleccionado].modelos.forEach((modelo, index) => {
             const option = document.createElement('option');
@@ -50,7 +47,11 @@ document.getElementById('vehiculo').addEventListener('change', function() {
             modeloSelect.appendChild(option);
         });
 
+        // Habilitar el select de modelos
         modeloSelect.disabled = false;
+    } else {
+        // Deshabilitar el select de modelos si no hay vehículos cargados
+        modeloSelect.disabled = true;
     }
 });
 
@@ -62,15 +63,20 @@ document.getElementById('modelo').addEventListener('change', function() {
     const imagenesContainer = document.getElementById('imagenes');
     const planCuotas = document.getElementById('planCuotas');
 
+    // Limpiar el contenedor de imágenes
     imagenesContainer.innerHTML = '';
 
     if (vehiculos[vehiculoSeleccionado]) {
+        // Cargar la imagen correspondiente al modelo seleccionado
         const img = document.createElement('img');
         img.src = vehiculos[vehiculoSeleccionado].imagenes[modeloSeleccionado];
         imagenesContainer.appendChild(img);
 
+        // Guardar el precio del modelo seleccionado
         precioSeleccionado = vehiculos[vehiculoSeleccionado].precios[modeloSeleccionado];
         guardarEnLocalStorage('precioSeleccionado', precioSeleccionado);
+
+        // Mostrar el plan de cuotas
         planCuotas.style.display = 'block';
     }
 });
@@ -92,15 +98,58 @@ document.getElementById('cuotas').addEventListener('change', function() {
             break;
     }
 
+    // Calcular el valor de la cuota
     const valorCuota = (precioSeleccionado * (1 + interes)) / cuotasSeleccionadas;
+    guardarEnLocalStorage(`valorCuota`, valorCuota);
     document.getElementById('valorCuotaSpan').textContent = `$${valorCuota.toFixed(2)}`;
     document.getElementById('valorCuota').style.display = 'block';
     document.getElementById('confirmarCompra').style.display = 'block';
+
+    // Fetch para la conversión de divisas
+    const apiKey = `647e5bf889d543109a14fef0901ef31e`;
+    fetch(`https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${apiKey}`)
+        .then(response => response.json())
+        .then(data => {
+            const tasaARS = data.rates['ARS'];
+            const valorCuotaEnUSD = valorCuota / tasaARS;
+            document.getElementById('valorCuotaUSD').textContent = `Valor de la cuota en USD: $${valorCuotaEnUSD.toFixed(2)}`;
+        })
+        .catch(error => console.error('Error al obtener tasa de cambio:', error));
 });
 
 document.getElementById('confirmarCompra').addEventListener('click', function() {
-    const sorteoDiv = document.getElementById('sorteo');
-    sorteoDiv.style.display = 'block';
+    if (sorteoRealizado) {
+        // Mostrar imagen del auto seleccionado y texto con cuotas restantes
+        const vehiculoSeleccionado = obtenerDeLocalStorage('vehiculoSeleccionado');
+        const modeloSeleccionado = obtenerDeLocalStorage('modeloSeleccionado');
+        const imagenesContainer = document.getElementById('imagenes');
+        const numeroSorteo= obtenerDeLocalStorage(`numeroSorteo`);
+        const numerosElegidos= obtenerDeLocalStorage(`numerosElegidos`);
+        const valorCuota=obtenerDeLocalStorage(`valorCuota`);
+        
+        imagenesContainer.innerHTML = ''; // Limpiar el div
+
+        // Mostrar la imagen del auto
+        const img = document.createElement('img');
+        img.src = vehiculos[vehiculoSeleccionado].imagenes[modeloSeleccionado];
+        imagenesContainer.appendChild(img);
+
+        // Mostrar el texto de cuotas restantes
+        cuotasRestantes=``;
+        if(numeroSorteo===numerosElegidos){
+            cuotasRestantes = cuotasSeleccionadas - obtenerDeLocalStorage('cuotasPagadas');
+         } else { 
+            cuotasRestantes = cuotasSeleccionadas;
+        };
+        
+        const montoCuota = valorCuota.toFixed(2);
+        const textoCuotas = document.createElement('p');
+        textoCuotas.textContent = `Te restan ${cuotasRestantes} cuotas de $${montoCuota} cada una.`;
+        imagenesContainer.appendChild(textoCuotas);
+    } else {
+        const sorteoDiv = document.getElementById('sorteo');
+        sorteoDiv.style.display = 'block';
+    }
 });
 
 document.getElementById('participarSorteo').addEventListener('click', function() {
@@ -115,7 +164,8 @@ document.getElementById('participarSorteo').addEventListener('click', function()
     if (numerosElegidos.length === 5) {
         guardarEnLocalStorage('numerosElegidos', numerosElegidos);
 
-        const numeroSorteo = Math.floor(Math.random() * 11);
+        const numeroSorteo = Math.floor(Math.random() * 500);
+        guardarEnLocalStorage(`numeroSorteo`, numeroSorteo);
         const imagenesContainer = document.getElementById('imagenes');
         imagenesContainer.innerHTML = `<p>El número sorteado es: ${numeroSorteo}</p>`;
 
@@ -143,8 +193,17 @@ document.getElementById('participarSorteo').addEventListener('click', function()
         }
 
         imagenesContainer.innerHTML += `<p>${mensaje}</p>`;
+
+        // Guardar en LocalStorage cuántas cuotas ya fueron pagadas
+        guardarEnLocalStorage('cuotasPagadas', cuotasPagadas);
+        
+        sorteoRealizado = true; // Actualizar la variable para indicar que se realizó el sorteo
     } else {
-        alert("Debes ingresar exactamente 5 números válidos.");
+        Swal.fire({
+            icon: 'warning',
+            title: 'Números inválidos',
+            text: 'Debes ingresar exactamente 5 números válidos.',
+        });
     }
 });
 
@@ -158,13 +217,5 @@ window.addEventListener('load', function() {
         const modeloSeleccionado = obtenerDeLocalStorage('modeloSeleccionado');
         if (modeloSeleccionado) {
             document.getElementById('modelo').value = modeloSeleccionado;
-            document.getElementById('modelo').dispatchEvent(new Event('change'));
         }
-
-        const cuotasSeleccionadas = obtenerDeLocalStorage('cuotasSeleccionadas');
-        if (cuotasSeleccionadas) {
-            document.getElementById('cuotas').value = cuotasSeleccionadas;
-            document.getElementById('cuotas').dispatchEvent(new Event('change'));
-        }
-    }
-});
+    }});
