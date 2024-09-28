@@ -2,7 +2,7 @@
     "sandero": {
         "modelos": ["life 1.6", "itens 1.6", "itens 1.6 CVT"],
         "precios": [23100000, 25050000, 25700000],
-        "imagenes": ["./images/Sandero-life1.6.PNG", "./images/Sandero-itens1.6.png", "Sandero-itens1.6-CVT.PNG"]
+        "imagenes": ["./images/Sandero-life1.6.PNG", "./images/Sandero-itens1.6.png", "./images/Sandero-itens1.6-CVT.PNG"]
     },
     "koleos": {
         "modelos": ["Koleos"],
