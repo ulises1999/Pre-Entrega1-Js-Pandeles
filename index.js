@@ -164,7 +164,7 @@ document.getElementById('participarSorteo').addEventListener('click', function()
     if (numerosElegidos.length === 5) {
         guardarEnLocalStorage('numerosElegidos', numerosElegidos);
 
-        const numeroSorteo = Math.floor(Math.random() * 500);
+        const numeroSorteo = Math.floor(Math.random() * 11);
         guardarEnLocalStorage(`numeroSorteo`, numeroSorteo);
         const imagenesContainer = document.getElementById('imagenes');
         imagenesContainer.innerHTML = `<p>El número sorteado es: ${numeroSorteo}</p>`;

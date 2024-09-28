@@ -2,7 +2,7 @@
     "sandero": {
         "modelos": ["life 1.6", "itens 1.6", "itens 1.6 CVT"],
         "precios": [23100000, 25050000, 25700000],
-        "imagenes": ["./images/Sandero-life1.6.png", "./images/Sandero-itens1.6.png", "Sandero-itens1.6-CVT.png"]
+        "imagenes": ["./images/Sandero-life1.6.PNG", "./images/Sandero-itens1.6.png", "Sandero-itens1.6-CVT.PNG"]
     },
     "koleos": {
         "modelos": ["Koleos"],
@@ -12,11 +12,11 @@
     "kardian": {
         "modelos": ["Evolution 150 MT", "Evolution 200 EDC", "Techno 200 EDC", "Premiere Edition 200 EDC"],
         "precios": [25800000, 28000000, 29200000, 29950000],
-        "imagenes": ["./images/Kardian-Evolution-150-MT.PNG", "./images/Kardian-Evolution-200-EDC.png", "./images/Kardian-Techno-200-EDC.png", "./images/Premiere-Edition-200-EDC.png"]
+        "imagenes": ["./images/Kardian-Evolution-150-MT.PNG", "./images/Kardian-Evolution-200-EDC.PNG", "./images/Kardian-Techno-200-EDC.PNG", "./images/Premiere-Edition-200-EDC.PNG"]
     },
     "megane": {
         "modelos": ["Megane"],
         "precios": [71000000],
-        "imagenes": ["./images/Koleos.PNG"]
+        "imagenes": ["./images/Megane.PNG"]
     }
 }
