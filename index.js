@@ -1,3 +1,4 @@
+localStorage.clear();
 let vehiculos = {};
 let precioSeleccionado = 0;
 let cuotasSeleccionadas = 0;
@@ -151,11 +152,11 @@ function limpiarCampos() {
     });
 }
 
-// Ejecutar limpiarCampos después de un tiempo (por ejemplo, 5 segundos)
+// Ejecutar limpiarCampos después de un tiempo (por ejemplo, 10 segundos)
 function ejecutarResetCompleto() {
     setTimeout(() => {
         limpiarCampos();
-    }, 5000); // 5seg
+    }, 10000); // 10seg
 }
 
 document.getElementById('confirmarCompra').addEventListener('click', function() {
