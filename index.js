@@ -80,7 +80,7 @@ document.getElementById('modelo').addEventListener('change', function() {
         planCuotas.style.display = 'block';
     }
 });
-
+let valorCuota=``;
 document.getElementById('cuotas').addEventListener('change', function() {
     cuotasSeleccionadas = parseInt(this.value);
     guardarEnLocalStorage('cuotasSeleccionadas', cuotasSeleccionadas);
@@ -99,7 +99,7 @@ document.getElementById('cuotas').addEventListener('change', function() {
     }
 
     // Calcular el valor de la cuota
-    const valorCuota = (precioSeleccionado * (1 + interes)) / cuotasSeleccionadas;
+    valorCuota = (precioSeleccionado * (1 + interes)) / cuotasSeleccionadas;
     guardarEnLocalStorage(`valorCuota`, valorCuota);
     document.getElementById('valorCuotaSpan').textContent = `$${valorCuota.toFixed(2)}`;
     document.getElementById('valorCuota').style.display = 'block';
@@ -117,6 +117,47 @@ document.getElementById('cuotas').addEventListener('change', function() {
         .catch(error => console.error('Error al obtener tasa de cambio:', error));
 });
 
+// Función para limpiar campos y resetear el formulario
+function limpiarCampos() {
+    // Limpiar campos del formulario
+    document.getElementById('vehiculo').value = '';
+    document.getElementById('modelo').innerHTML = '<option value="">--Seleccionar--</option>';
+    document.getElementById('cuotas').value = '';
+    document.querySelectorAll('.numeroSorteo').forEach(input => input.value = '');
+
+    // Ocultar secciones que deben estar ocultas al principio
+    document.getElementById('valorCuota').style.display = 'none';
+    document.getElementById('confirmarCompra').style.display = 'none';
+    document.getElementById('planCuotas').style.display = 'none';
+    document.getElementById('sorteo').style.display = 'none';
+    document.getElementById('imagenes').innerHTML = '';
+
+    // Resetear variables del ciclo
+    precioSeleccionado = 0;
+    cuotasSeleccionadas = 0;
+    sorteoRealizado = false;
+
+    // Limpiar el localStorage
+    localStorage.clear();
+
+    // Habilitar nuevamente el botón de "Participar en el sorteo"
+    document.getElementById('participarSorteo').disabled = false;
+
+    // Mostrar mensaje de que todo se ha reiniciado
+    Swal.fire({
+        icon: 'success',
+        title: 'Proceso reiniciado',
+        text: 'Ya puedes realizar una nueva compra y participar en el sorteo.',
+    });
+}
+
+// Ejecutar limpiarCampos después de un tiempo (por ejemplo, 5 segundos)
+function ejecutarResetCompleto() {
+    setTimeout(() => {
+        limpiarCampos();
+    }, 5000); // 5seg
+}
+
 document.getElementById('confirmarCompra').addEventListener('click', function() {
     if (sorteoRealizado) {
         // Mostrar imagen del auto seleccionado y texto con cuotas restantes
@@ -126,7 +167,8 @@ document.getElementById('confirmarCompra').addEventListener('click', function() 
         const numeroSorteo= obtenerDeLocalStorage(`numeroSorteo`);
         const numerosElegidos= obtenerDeLocalStorage(`numerosElegidos`);
         const valorCuota=obtenerDeLocalStorage(`valorCuota`);
-        
+        const cuotasPagadas=obtenerDeLocalStorage('cuotasPagadas');
+
         imagenesContainer.innerHTML = ''; // Limpiar el div
 
         // Mostrar la imagen del auto
@@ -136,20 +178,24 @@ document.getElementById('confirmarCompra').addEventListener('click', function() 
 
         // Mostrar el texto de cuotas restantes
         cuotasRestantes=``;
-        if(numeroSorteo===numerosElegidos){
-            cuotasRestantes = cuotasSeleccionadas - obtenerDeLocalStorage('cuotasPagadas');
+        if(numerosElegidos.includes(numeroSorteo)){
+            cuotasRestantes = cuotasSeleccionadas - cuotasPagadas;
          } else { 
             cuotasRestantes = cuotasSeleccionadas;
         };
-        
-        const montoCuota = valorCuota.toFixed(2);
+
         const textoCuotas = document.createElement('p');
-        textoCuotas.textContent = `Te restan ${cuotasRestantes} cuotas de $${montoCuota} cada una.`;
+        textoCuotas.textContent = `Te restan ${cuotasRestantes} cuotas de $${valorCuota} cada una.`;
         imagenesContainer.appendChild(textoCuotas);
+        // Ejecutar limpiarCampos después de un tiempo (por ejemplo, 30 segundos)
+        ejecutarResetCompleto();
+
     } else {
         const sorteoDiv = document.getElementById('sorteo');
         sorteoDiv.style.display = 'block';
     }
+    
+
 });
 
 document.getElementById('participarSorteo').addEventListener('click', function() {
@@ -164,7 +210,7 @@ document.getElementById('participarSorteo').addEventListener('click', function()
     if (numerosElegidos.length === 5) {
         guardarEnLocalStorage('numerosElegidos', numerosElegidos);
 
-        const numeroSorteo = Math.floor(Math.random() * 11);
+        const numeroSorteo = Math.floor(Math.random() * 4);
         guardarEnLocalStorage(`numeroSorteo`, numeroSorteo);
         const imagenesContainer = document.getElementById('imagenes');
         imagenesContainer.innerHTML = `<p>El número sorteado es: ${numeroSorteo}</p>`;
@@ -186,10 +232,9 @@ document.getElementById('participarSorteo').addEventListener('click', function()
         }
 
         const cuotasRestantes = cuotasSeleccionadas - cuotasPagadas;
-        const montoCuota = (precioSeleccionado / cuotasSeleccionadas).toFixed(2);
 
         if (aciertos > 0) {
-            mensaje += `<br>Por lo tanto, ya cuentas con ${cuotasPagadas} cuota(s) pagada(s). Te restan ${cuotasRestantes} cuotas de $${montoCuota} cada una.`;
+            mensaje += `<br>Por lo tanto, ya cuentas con ${cuotasPagadas} cuota(s) pagada(s). Te restan ${cuotasRestantes} cuotas de $${valorCuota} cada una.`;
         }
 
         imagenesContainer.innerHTML += `<p>${mensaje}</p>`;
@@ -198,6 +243,15 @@ document.getElementById('participarSorteo').addEventListener('click', function()
         guardarEnLocalStorage('cuotasPagadas', cuotasPagadas);
         
         sorteoRealizado = true; // Actualizar la variable para indicar que se realizó el sorteo
+
+
+        document.getElementById('participarSorteo').disabled = true; // Bloquea el boton de sorteo para que solo se participe 1 vez
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Sorteo realizado',
+            text: 'Gracias por participar. Ya no puedes volver a realizar el sorteo.',
+        });
     } else {
         Swal.fire({
             icon: 'warning',
